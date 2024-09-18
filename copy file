@@ -1,0 +1,14 @@
+#include<stdio.h>
+int main(){
+	char so[100],des[100];
+	scanf("%s",so);
+	int i=0;
+	while(so[i]!='\0'){
+		des[i]=so[i];
+		i++;
+	}
+	des[i]='\0';
+	printf("source:%s\n",so);
+	printf("dest: %s",des);
+	return 0;
+}
