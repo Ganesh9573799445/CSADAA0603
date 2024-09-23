@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+int gcd(int a, int b) {
+    while (b) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+bool helper(int *nums, int numsSize, int i, int n, int sum, int target, int *subset, int *subsetSize) {
+    if (n == 0) {
+        return sum == target;
+    }
+    if (i >= numsSize) {
+        return false;
+    }
+    
+    // Try including nums[i]
+    subset[*subsetSize] = nums[i];
+    (*subsetSize)++;
+    if (helper(nums, numsSize, i + 1, n - 1, sum + nums[i], target, subset, subsetSize)) {
+        return true;
+    }
+    // Backtrack
+    (*subsetSize)--;
+    
+    // Try excluding nums[i]
+    return helper(nums, numsSize, i + 1, n, sum, target, subset, subsetSize);
+}
+
+bool splitArraySameAverage(int* nums, int numsSize, int* subsetA, int* subsetB, int* sizeA, int* sizeB) {
+    int totalSum = 0;
+    for (int i = 0; i < numsSize; i++) {
+        totalSum += nums[i];
+    }
+
+    for (int n = 1; n <= numsSize / 2; n++) {
+        if ((totalSum * n) % numsSize == 0) {
+            int target = (totalSum * n) / numsSize;
+            int tempSubset[numsSize];
+            int subsetSize = 0;
+
+            if (helper(nums, numsSize, 0, n, 0, target, tempSubset, &subsetSize)) {
+                // If found subset A
+                *sizeA = subsetSize;
+                for (int i = 0; i < *sizeA; i++) {
+                    subsetA[i] = tempSubset[i];
+                }
+
+                // Populate subset B
+                *sizeB = 0;
+                for (int i = 0, j = 0; i < numsSize; i++) {
+                    bool inSubsetA = false;
+                    for (int k = 0; k < *sizeA; k++) {
+                        if (nums[i] == subsetA[k]) {
+                            inSubsetA = true;
+                            break;
+                        }
+                    }
+                    if (!inSubsetA) {
+                        subsetB[j++] = nums[i];
+                        (*sizeB)++;
+                    }
+                }
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+double calculateAverage(int* arr, int size) {
+    int sum = 0;
+    for (int i = 0; i < size; i++) {
+        sum += arr[i];
+    }
+    return (double)sum / size;
+}
+
+int main() {
+    int nums[100], numsSize;
+    
+    // Input the array size
+    printf("Enter the number of elements in the array: ");
+    scanf("%d", &numsSize);
+
+    // Input the array elements
+    printf("Enter the elements of the array: ");
+    for (int i = 0; i < numsSize; i++) {
+        scanf("%d", &nums[i]);
+    }
+
+    int subsetA[numsSize], subsetB[numsSize];
+    int sizeA = 0, sizeB = 0;
+
+    if (splitArraySameAverage(nums, numsSize, subsetA, subsetB, &sizeA, &sizeB)) {
+        printf("Split is possible.\n");
+        
+        // Print Array A
+        printf("Array A: ");
+        for (int i = 0; i < sizeA; i++) {
+            printf("%d ", subsetA[i]);
+        }
+        printf("\nAverage of Array A: %.2f\n", calculateAverage(subsetA, sizeA));
+        
+        // Print Array B
+        printf("Array B: ");
+        for (int i = 0; i < sizeB; i++) {
+            printf("%d ", subsetB[i]);
+        }
+        printf("\nAverage of Array B: %.2f\n", calculateAverage(subsetB, sizeB));
+        
+    } else {
+        printf("Split is not possible.\n");
+    }
+
+    return 0;
+}
